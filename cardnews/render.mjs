@@ -48,9 +48,9 @@ const lines = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 
 function slideHtml(deck, slide, index, baseDir) {
   const tpl = slide.template || (index === 0 ? 'cover' : 'content');
-  const page = `${String(index + 1).padStart(2, '0')} / ${String(deck.slides.length).padStart(2, '0')}`;
+  const page = `${String(index + 1).padStart(2, '0')} / ${String(deck.total || deck.slides.length).padStart(2, '0')}`;
   const img = slide.image
-    ? `<img class="art" src="${pathToFileURL(path.resolve(baseDir, slide.image))}">`
+    ? `<img class="art" src="${pathToFileURL(path.resolve(baseDir, slide.image))}"${slide.imageOverlap ? ` style="margin-bottom:-${slide.imageOverlap}px"` : ''}>`
     : '<div class="art placeholder">이미지 자리</div>';
   const title = lines(slide.title).map((l) => `<div>${rich(l)}</div>`).join('');
   const desc = lines(slide.desc).map((l) => `<div>${rich(l)}</div>`).join('');
@@ -69,7 +69,7 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .art { display: block; flex: 1 1 auto; min-height: 0; max-width: 100%; object-fit: contain; }
 .placeholder { width: 100%; border: 4px dashed #d9cf9f; border-radius: 24px; display: flex;
   align-items: center; justify-content: center; font-family: 'cn-body'; font-size: 32px; color: #b8ad7a; }
-.title { font-family: 'cn-title'; letter-spacing: -2px; line-height: 1.12; }
+.title { position: relative; font-family: 'cn-title'; letter-spacing: -2px; line-height: 1.12; }
 .desc { font-family: 'cn-body'; color: #111; font-size: 31px; line-height: 1.45; letter-spacing: -0.5px; }
 
 /* 표지: 흰 글씨 + 검정 외곽선, 강조는 형광 연두 */

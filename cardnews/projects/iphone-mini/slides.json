@@ -1,0 +1,13 @@
+{
+  "tab": "iPhone mini.zip",
+  "total": 5,
+  "slides": [
+    {
+      "template": "cover",
+      "image": "images/cover.png",
+      "imageOverlap": 40,
+      "title": ["단종됐는데도 계속 찾는", "[아이폰 미니]"],
+      "desc": ["왜 사람들은 아이폰 미니를 그리워할까?"]
+    }
+  ]
+}
