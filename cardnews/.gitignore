@@ -1,2 +1,5 @@
 node_modules/
 output/
+# 폰트 파일은 라이선스 때문에 저장소에 올리지 않습니다
+fonts/*
+!fonts/.gitkeep
