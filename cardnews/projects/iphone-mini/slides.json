@@ -6,8 +6,64 @@
       "template": "cover",
       "image": "images/cover.png",
       "imageOverlap": 70,
-      "title": ["단종됐는데도 계속 찾는", "[아이폰 미니]"],
-      "desc": ["왜 사람들은 아이폰 미니를 그리워할까?"]
+      "title": [
+        "단종됐는데도 계속 찾는",
+        "[아이폰 미니]"
+      ],
+      "desc": [
+        "왜 사람들은 아이폰 미니를 그리워할까?"
+      ]
+    },
+    {
+      "template": "cover",
+      "tab": "User_Review.jpg",
+      "tabIcon": "image",
+      "highlight": "#ff8c92",
+      "title": [
+        "작아서 더 좋았던",
+        "[실제 사용자들의 반응]"
+      ],
+      "avatar": "images/avatar.png",
+      "side": {
+        "src": "images/pink-mini.png",
+        "left": 800,
+        "top": 210,
+        "width": 360,
+        "rotate": 12
+      },
+      "bubbles": [
+        {
+          "side": "left",
+          "spark": "right",
+          "text": [
+            "“한 손으로 다 돼서 너무 편했는데",
+            "지금은 대체할 폰이 없어요ㅠㅠ”"
+          ]
+        },
+        {
+          "side": "right",
+          "offset": 130,
+          "text": [
+            "“가벼워서 오래 써도 손이 안 아프고",
+            "주머니에 쏙 들어가서 최고였어요.”"
+          ]
+        },
+        {
+          "side": "left",
+          "text": [
+            "“큰 폰 쓰다가 다시 미니 쓰고 싶어서",
+            "중고까지 알아보고 있어요.”"
+          ]
+        },
+        {
+          "side": "right",
+          "spark": "left",
+          "text": [
+            "“작은데 성능도 좋아서",
+            "일상 사용에는 전혀 부족함이 없었어요.”"
+          ]
+        }
+      ]
     }
   ]
 }

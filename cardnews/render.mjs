@@ -44,6 +44,11 @@ function fontFaces() {
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // [대괄호] 안의 글자는 형광 강조
 const rich = (s) => esc(s).replace(/\[([^\]]+)\]/g, '<em>$1</em>');
+// 둥근 외곽선: text-stroke는 모서리가 뾰족하게 튀어나와서 그림자를 원형으로 둘러 만든다
+const roundStroke = (r, color = '#000') => Array.from({ length: 32 }, (_, i) => {
+  const a = (i / 32) * Math.PI * 2;
+  return `${(Math.cos(a) * r).toFixed(2)}px ${(Math.sin(a) * r).toFixed(2)}px 0 ${color}`;
+}).join(', ');
 const lines = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 
 function slideHtml(deck, slide, index, baseDir) {
@@ -54,12 +59,26 @@ function slideHtml(deck, slide, index, baseDir) {
     : '<div class="art placeholder">이미지 자리</div>';
   const title = lines(slide.title).map((l) => `<div>${rich(l)}</div>`).join('');
   const desc = lines(slide.desc).map((l) => `<div>${rich(l)}</div>`).join('');
-  const icon = pathToFileURL(path.join(ROOT, 'templates', 'icon-folder.png'));
+  const icon = pathToFileURL(path.join(ROOT, 'templates', `icon-${slide.tabIcon || deck.tabIcon || 'folder'}.png`));
+  const asset = (p) => pathToFileURL(path.resolve(baseDir, p));
+  // 말풍선(후기) 레이아웃: bubbles = [{ side: 'left'|'right', text: [...], spark: 'left'|'right' }]
+  const bubbles = (slide.bubbles || []).map((b) => `
+    <div class="bubble ${b.side || 'left'}"${b.offset ? ` style="margin-${b.side === 'right' ? 'right' : 'left'}:${b.offset}px"` : ''}>
+      ${b.spark ? `<svg class="spark ${b.spark}" viewBox="0 0 60 60"><path d="M30 6 L36 26 M8 22 L26 34 M10 52 L30 44"/></svg>` : ''}
+      ${slide.avatar ? `<img class="avatar" src="${asset(slide.avatar)}">` : ''}
+      <div class="say">${lines(b.text).map((l) => `<div>${rich(l)}</div>`).join('')}</div>
+      <svg class="tail" viewBox="0 0 44 34"><path class="f" d="M4 0 C6 14 20 26 42 31 C28 22 26 10 27 0 Z"/><path class="s" d="M4 0 C6 14 20 26 42 31 C28 22 26 10 27 0"/></svg>
+    </div>`).join('');
+  // 패널 안에 잘려 보이는 장식 이미지: side = { src, left|right, top, width, rotate }
+  const side = slide.side
+    ? `<div class="clip"><img class="side" src="${asset(slide.side.src)}" style="${['left', 'right', 'top', 'width']
+        .filter((k) => slide.side[k] != null).map((k) => `${k}:${slide.side[k]}px`).join(';')};transform:rotate(${slide.side.rotate || 0}deg)"></div>`
+    : '';
   const frame = pathToFileURL(path.join(ROOT, 'templates', `frame-${tpl}.png`));
 
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 ${fontFaces()}
-:root { --lime: ${deck.highlight || '#f1ff50'}; --blue: ${deck.pageColor || '#1a66ff'}; }
+:root { --lime: ${slide.highlight || deck.highlight || '#f1ff50'}; --blue: ${deck.pageColor || '#1a66ff'}; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: ${SIZE}px; height: ${SIZE}px; overflow: hidden; }
 body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position: relative; word-break: keep-all; }
@@ -79,7 +98,7 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 /* 표지: 흰 글씨 + 검정 외곽선, 강조는 형광 연두 */
 .cover .body { left: 60px; right: 60px; top: 172px; bottom: 70px; }
 .cover .art { margin-bottom: 14px; }
-.cover .title { color: #fff; -webkit-text-stroke: 14px #000; paint-order: stroke fill; }
+.cover .title { color: #fff; text-shadow: ${roundStroke(7)}; }
 .cover .title div:first-child { font-size: 74px; }
 .cover .title div + div { font-size: 92px; margin-top: 2px; }
 .cover .title em { font-style: normal; color: var(--lime); }
@@ -91,11 +110,36 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .content .title em { font-style: normal; background: linear-gradient(transparent 55%, var(--lime) 55%); padding: 0 4px; }
 .content .art { border-radius: 20px; }
 .content .desc em { font-style: normal; font-family: 'cn-title'; }
-</style></head><body class="${tpl}">
-  <div class="tab">${deck.tabIcon === false ? '' : `<img class="ico" src="${icon}">`}<span>${esc(slide.tab || deck.tab || '')}</span></div>
+
+/* 말풍선 후기 */
+.clip { position: absolute; left: 62px; top: 179px; right: 58px; bottom: 53px; border-radius: 26px; overflow: hidden; }
+.side { position: absolute; }
+.chat { width: 100%; display: flex; flex-direction: column; gap: 24px; margin-top: 30px; }
+.cover.has-chat .body { top: 196px; }
+.has-chat .title div:first-child { font-size: 68px; }
+.has-chat .title div + div { font-size: 84px; }
+.bubble { position: relative; display: flex; align-items: center; gap: 26px; padding: 14px 40px 14px 20px;
+  border: 3.5px solid #111; border-radius: 48px; background: #f3f2f2; text-align: left; }
+.bubble.left { align-self: flex-start; margin-left: 10px; }
+.bubble.right { align-self: flex-end; background: #e2f0fd; margin-right: 0; }
+.avatar { width: 86px; height: 86px; flex: none; }
+.say { font-family: 'cn-body'; font-size: 29px; line-height: 1.42; color: #111; letter-spacing: -0.6px; }
+.tail { position: absolute; bottom: -29px; width: 44px; height: 34px; overflow: visible; }
+.tail .f { fill: #f3f2f2; } .right .tail .f { fill: #e2f0fd; }
+.tail .s { fill: none; stroke: #111; stroke-width: 3.5px; stroke-linejoin: round; }
+.left .tail { left: 46px; transform: scaleX(-1); }
+.right .tail { right: 46px; }
+.spark { position: absolute; width: 60px; height: 60px; }
+.spark path { stroke: #111; stroke-width: 5px; stroke-linecap: round; fill: none; }
+.spark.right { right: -78px; top: -20px; transform: scaleX(-1); }
+.spark.left { left: -78px; bottom: -14px; transform: scaleY(-1); }
+</style></head><body class="${tpl}${bubbles ? ' has-chat' : ''}">
+  ${side}
+  <div class="tab">${(slide.tabIcon ?? deck.tabIcon) === false ? '' : `<img class="ico" src="${icon}">`}<span>${esc(slide.tab || deck.tab || '')}</span></div>
   <div class="page">${page}</div>
   <div class="body">
-    ${tpl === 'cover' ? `${img}<div class="title">${title}</div>` : `<div class="title">${title}</div>${img}`}
+    ${bubbles ? `<div class="title">${title}</div><div class="chat">${bubbles}</div>`
+      : tpl === 'cover' ? `${img}<div class="title">${title}</div>` : `<div class="title">${title}</div>${img}`}
     ${desc ? `<div class="desc">${desc}</div>` : ''}
   </div>
 </body></html>`;
