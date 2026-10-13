@@ -54,6 +54,7 @@ function slideHtml(deck, slide, index, baseDir) {
     : '<div class="art placeholder">이미지 자리</div>';
   const title = lines(slide.title).map((l) => `<div>${rich(l)}</div>`).join('');
   const desc = lines(slide.desc).map((l) => `<div>${rich(l)}</div>`).join('');
+  const icon = pathToFileURL(path.join(ROOT, 'templates', 'icon-folder.png'));
   const frame = pathToFileURL(path.join(ROOT, 'templates', `frame-${tpl}.png`));
 
   return `<!doctype html><html><head><meta charset="utf-8"><style>
@@ -62,9 +63,12 @@ ${fontFaces()}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: ${SIZE}px; height: ${SIZE}px; overflow: hidden; }
 body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position: relative; word-break: keep-all; }
-.tab { position: absolute; display: flex; align-items: center; justify-content: space-between;
+.tab, .page { position: absolute; display: flex; align-items: center; }
+/* 탭 흰 영역: 왼쪽 y 83~155, 오른쪽(페이지 번호) y 102~155 */
+.tab { left: 100px; top: 83px; height: 72px; gap: 12px;
   font-family: 'cn-tab'; font-size: 27px; color: #111; letter-spacing: -0.3px; }
-.tab .page { font-family: 'cn-title'; color: var(--blue); font-size: 25px; }
+.tab .ico { height: 34px; width: auto; }
+.page { right: 100px; top: 102px; height: 53px; font-family: 'cn-title'; color: var(--blue); font-size: 25px; }
 .body { position: absolute; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .art { display: block; flex: 1 1 auto; min-height: 0; max-width: 100%; object-fit: contain; }
 .placeholder { width: 100%; border: 4px dashed #d9cf9f; border-radius: 24px; display: flex;
@@ -73,8 +77,7 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .desc { font-family: 'cn-body'; color: #111; font-size: 31px; line-height: 1.45; letter-spacing: -0.5px; }
 
 /* 표지: 흰 글씨 + 검정 외곽선, 강조는 형광 연두 */
-.cover .tab { left: 100px; right: 100px; top: 84px; height: 72px; }
-.cover .body { left: 60px; right: 60px; top: 190px; bottom: 70px; }
+.cover .body { left: 60px; right: 60px; top: 172px; bottom: 70px; }
 .cover .art { margin-bottom: 14px; }
 .cover .title { color: #fff; -webkit-text-stroke: 14px #000; paint-order: stroke fill; }
 .cover .title div:first-child { font-size: 74px; }
@@ -83,14 +86,14 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .cover .desc { margin-top: 18px; }
 
 /* 본문: 검정 글씨, 강조는 형광펜 밑줄 */
-.content .tab { left: 100px; right: 100px; top: 88px; height: 64px; }
 .content .body { left: 100px; right: 100px; top: 196px; bottom: 100px; gap: 26px; }
 .content .title { color: #111; font-size: 64px; }
 .content .title em { font-style: normal; background: linear-gradient(transparent 55%, var(--lime) 55%); padding: 0 4px; }
 .content .art { border-radius: 20px; }
 .content .desc em { font-style: normal; font-family: 'cn-title'; }
 </style></head><body class="${tpl}">
-  <div class="tab"><span>${esc(slide.tab || deck.tab || '')}</span><span class="page">${page}</span></div>
+  <div class="tab">${deck.tabIcon === false ? '' : `<img class="ico" src="${icon}">`}<span>${esc(slide.tab || deck.tab || '')}</span></div>
+  <div class="page">${page}</div>
   <div class="body">
     ${tpl === 'cover' ? `${img}<div class="title">${title}</div>` : `<div class="title">${title}</div>${img}`}
     ${desc ? `<div class="desc">${desc}</div>` : ''}
