@@ -1,6 +1,7 @@
 // 카드뉴스 렌더러: projects/<이름>/slides.json → output/<이름>/01.png ...
 // 사용법: node render.mjs projects/apple-event-1013
 import { chromium } from 'playwright';
+import { icon as lineIcon } from './icons.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -68,6 +69,13 @@ function slideHtml(deck, slide, index, baseDir) {
       ${slide.avatar ? `<img class="avatar" src="${asset(slide.avatar)}">` : ''}
       <div class="say">${lines(b.text).map((l) => `<div>${rich(l)}</div>`).join('')}</div>
     </div>`).join('');
+  // 번호 목록 레이아웃: items = [{ icon, title, desc }]
+  const items = (slide.items || []).map((it, i) => `
+    <div class="item">
+      <div class="num">${i + 1}</div>
+      ${lineIcon(it.icon)}
+      <div class="txt"><b>${rich(it.title)}</b><span>${rich(it.desc || '')}</span></div>
+    </div>`).join('');
   // 패널 안에 잘려 보이는 장식 이미지: side = { src, left|right, top, width, rotate }
   const side = slide.side
     ? `<div class="clip"><img class="side" src="${asset(slide.side.src)}" style="${['left', 'right', 'top', 'width']
@@ -117,20 +125,34 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .bubble.gray { align-self: flex-start; }
 .bubble.blue { align-self: flex-end; }
 .cover.has-chat .body { top: 196px; }
-.has-chat .title div:first-child { font-size: 68px; }
-.has-chat .title div + div { font-size: 84px; }
+.cover.has-list .body { top: 196px; }
+.has-chat .title div:first-child, .has-list .title div:first-child { font-size: 68px; }
+.has-chat .title div + div, .has-list .title div + div { font-size: 84px; }
+/* 번호 목록 */
+.list { position: relative; align-self: flex-end; width: var(--list-w, 100%); display: flex; flex-direction: column; gap: 18px; margin-top: 40px; }
+.list::before { content: ''; position: absolute; left: 25px; top: 40px; bottom: 40px; width: 3.5px; background: #111; }
+.item { position: relative; margin-left: 27px; height: 100px; display: flex; align-items: center; gap: 16px; padding: 0 18px 0 44px;
+  background: #fff; border: 3.5px solid #111; border-radius: 22px; text-align: left; }
+.num { position: absolute; left: -29px; top: 50%; transform: translateY(-50%); width: 54px; height: 54px; border-radius: 50%;
+  background: var(--num-bg, #cfe8ff); border: 3.5px solid #111; display: flex; align-items: center; justify-content: center;
+  font-family: 'cn-title'; font-size: 28px; line-height: 1; padding-top: 3px; }
+.ico-line { width: 54px; height: 54px; flex: none; fill: none; stroke: #111; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.txt { display: flex; flex-direction: column; gap: 6px; }
+.txt b { font-family: 'cn-title'; font-weight: normal; font-size: 27px; letter-spacing: -0.8px; color: #111; }
+.txt span { font-family: 'cn-body'; font-size: 20px; letter-spacing: -0.6px; color: #222; }
 .bubble { position: relative; isolation: isolate; display: flex; align-items: center; gap: 20px; padding: 14px 34px 14px 18px; text-align: left; }
 .bubble > svg { position: absolute; left: 0; top: 0; z-index: -1; overflow: visible; }
 .bubble path { fill: #fff; stroke: #111; stroke-width: 3.5px; stroke-linejoin: round; }
 .bubble.blue path { fill: #e2f0fd; }
 .avatar { width: 66px; height: 66px; flex: none; }
 .say { font-family: 'cn-body'; font-size: 25px; line-height: 1.42; color: #111; letter-spacing: -0.6px; }
-</style></head><body class="${tpl}${bubbles ? ' has-chat' : ''}">
+</style></head><body class="${tpl}${bubbles ? ' has-chat' : ''}${items ? ' has-list' : ''}">
   ${side}
   <div class="tab">${(slide.tabIcon ?? deck.tabIcon) === false ? '' : `<img class="ico" src="${icon}">`}<span>${esc(slide.tab || deck.tab || '')}</span></div>
   <div class="page">${page}</div>
   <div class="body">
-    ${bubbles ? `<div class="title">${title}</div><div class="chat"${slide.chatWidth ? ` style="--chat-w:${slide.chatWidth}px"` : ''}>${bubbles}</div>`
+    ${items ? `<div class="title">${title}</div><div class="list" style="${slide.listWidth ? `--list-w:${slide.listWidth}px;` : ''}${slide.numColor ? `--num-bg:${slide.numColor}` : ''}">${items}</div>`
+      : bubbles ? `<div class="title">${title}</div><div class="chat"${slide.chatWidth ? ` style="--chat-w:${slide.chatWidth}px"` : ''}>${bubbles}</div>`
       : tpl === 'cover' ? `${img}<div class="title">${title}</div>` : `<div class="title">${title}</div>${img}`}
     ${desc ? `<div class="desc">${desc}</div>` : ''}
   </div>

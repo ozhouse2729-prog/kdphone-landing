@@ -62,6 +62,50 @@
         }
       ],
       "chatWidth": 640
+    },
+    {
+      "template": "cover",
+      "tab": "iPhone_Mini.jpg",
+      "tabIcon": "image",
+      "highlight": "#ff8c92",
+      "title": [
+        "아이폰 미니가 사랑받았던",
+        "[5가지 이유]"
+      ],
+      "listWidth": 540,
+      "side": {
+        "src": "images/mini-boxes.png",
+        "left": 14,
+        "top": 326,
+        "width": 384
+      },
+      "items": [
+        {
+          "icon": "hand",
+          "title": "한 손에 잡히는 크기",
+          "desc": "작은 손에도 안정적인 그립감"
+        },
+        {
+          "icon": "feather",
+          "title": "가벼운 무게",
+          "desc": "무게 부담 없이 편한 사용감"
+        },
+        {
+          "icon": "backpack",
+          "title": "주머니에 쏙",
+          "desc": "작은 가방, 주머니에도 간편하게"
+        },
+        {
+          "icon": "camera",
+          "title": "일상에 충분한 성능",
+          "desc": "SNS, 사진, 영상, 게임까지 무리 없음"
+        },
+        {
+          "icon": "phone",
+          "title": "감성적인 컬러와 디자인",
+          "desc": "지금 봐도 예쁜 미니만의 매력"
+        }
+      ]
     }
   ]
 }
