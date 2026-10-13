@@ -113,7 +113,7 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 /* 말풍선 후기 */
 .clip { position: absolute; left: 62px; top: 179px; right: 58px; bottom: 53px; border-radius: 26px; overflow: hidden; }
 .side { position: absolute; }
-.chat { align-self: flex-start; width: var(--chat-w, 100%); display: flex; flex-direction: column; gap: 40px; margin-top: 30px; padding-left: 12px; }
+.chat { align-self: flex-start; width: var(--chat-w, 100%); display: flex; flex-direction: column; gap: 40px; margin-top: 56px; padding-left: 12px; }
 .bubble.gray { align-self: flex-start; }
 .bubble.blue { align-self: flex-end; }
 .cover.has-chat .body { top: 196px; }
@@ -121,7 +121,7 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .has-chat .title div + div { font-size: 84px; }
 .bubble { position: relative; isolation: isolate; display: flex; align-items: center; gap: 20px; padding: 14px 34px 14px 18px; text-align: left; }
 .bubble > svg { position: absolute; left: 0; top: 0; z-index: -1; overflow: visible; }
-.bubble path { fill: #f3f2f2; stroke: #111; stroke-width: 3.5px; stroke-linejoin: round; }
+.bubble path { fill: #fff; stroke: #111; stroke-width: 3.5px; stroke-linejoin: round; }
 .bubble.blue path { fill: #e2f0fd; }
 .avatar { width: 66px; height: 66px; flex: none; }
 .say { font-family: 'cn-body'; font-size: 25px; line-height: 1.42; color: #111; letter-spacing: -0.6px; }
