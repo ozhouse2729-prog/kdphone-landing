@@ -65,7 +65,7 @@ html, body { width: ${SIZE}px; height: ${SIZE}px; overflow: hidden; }
 body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position: relative; word-break: keep-all; }
 .tab, .page { position: absolute; display: flex; align-items: center; }
 /* 탭 흰 영역: 왼쪽 y 83~155, 오른쪽(페이지 번호) y 102~155 */
-.tab { left: 100px; top: 83px; height: 72px; gap: 12px;
+.tab { left: 100px; top: 83px; height: 72px; gap: 20px;
   font-family: 'cn-tab'; font-size: 27px; color: #111; letter-spacing: -0.3px; }
 .tab .ico { height: 42px; width: auto; }
 .page { right: 100px; top: 102px; height: 53px; font-family: 'cn-title'; color: var(--blue); font-size: 25px; }
@@ -83,7 +83,7 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .cover .title div:first-child { font-size: 74px; }
 .cover .title div + div { font-size: 92px; margin-top: 2px; }
 .cover .title em { font-style: normal; color: var(--lime); }
-.cover .desc { margin-top: 18px; font-size: 38px; }
+.cover .desc { margin: 12px 0 14px; font-size: 38px; }
 
 /* 본문: 검정 글씨, 강조는 형광펜 밑줄 */
 .content .body { left: 100px; right: 100px; top: 196px; bottom: 100px; gap: 26px; }
