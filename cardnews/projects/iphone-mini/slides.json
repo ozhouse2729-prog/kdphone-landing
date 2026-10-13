@@ -26,9 +26,9 @@
       "avatar": "images/avatar.png",
       "side": {
         "src": "images/pink-mini.png",
-        "left": 662,
-        "top": 236,
-        "width": 280,
+        "left": 634,
+        "top": 210,
+        "width": 324,
         "rotate": 0
       },
       "bubbles": [
@@ -60,7 +60,8 @@
             "일상 사용에는 전혀 부족함이 없었어요.”"
           ]
         }
-      ]
+      ],
+      "chatWidth": 640
     }
   ]
 }

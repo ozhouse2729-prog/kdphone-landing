@@ -113,7 +113,9 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 /* 말풍선 후기 */
 .clip { position: absolute; left: 62px; top: 179px; right: 58px; bottom: 53px; border-radius: 26px; overflow: hidden; }
 .side { position: absolute; }
-.chat { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 40px; margin-top: 30px; padding-left: 14px; }
+.chat { align-self: flex-start; width: var(--chat-w, 100%); display: flex; flex-direction: column; gap: 40px; margin-top: 30px; padding-left: 12px; }
+.bubble.gray { align-self: flex-start; }
+.bubble.blue { align-self: flex-end; }
 .cover.has-chat .body { top: 196px; }
 .has-chat .title div:first-child { font-size: 68px; }
 .has-chat .title div + div { font-size: 84px; }
@@ -121,14 +123,14 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 .bubble > svg { position: absolute; left: 0; top: 0; z-index: -1; overflow: visible; }
 .bubble path { fill: #f3f2f2; stroke: #111; stroke-width: 3.5px; stroke-linejoin: round; }
 .bubble.blue path { fill: #e2f0fd; }
-.avatar { width: 76px; height: 76px; flex: none; }
-.say { font-family: 'cn-body'; font-size: 27px; line-height: 1.42; color: #111; letter-spacing: -0.6px; }
+.avatar { width: 66px; height: 66px; flex: none; }
+.say { font-family: 'cn-body'; font-size: 25px; line-height: 1.42; color: #111; letter-spacing: -0.6px; }
 </style></head><body class="${tpl}${bubbles ? ' has-chat' : ''}">
   ${side}
   <div class="tab">${(slide.tabIcon ?? deck.tabIcon) === false ? '' : `<img class="ico" src="${icon}">`}<span>${esc(slide.tab || deck.tab || '')}</span></div>
   <div class="page">${page}</div>
   <div class="body">
-    ${bubbles ? `<div class="title">${title}</div><div class="chat">${bubbles}</div>`
+    ${bubbles ? `<div class="title">${title}</div><div class="chat"${slide.chatWidth ? ` style="--chat-w:${slide.chatWidth}px"` : ''}>${bubbles}</div>`
       : tpl === 'cover' ? `${img}<div class="title">${title}</div>` : `<div class="title">${title}</div>${img}`}
     ${desc ? `<div class="desc">${desc}</div>` : ''}
   </div>
@@ -139,9 +141,12 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 function drawBubbles() {
   document.querySelectorAll('.bubble').forEach((el) => {
     const w = el.offsetWidth, h = el.offsetHeight, r = Math.min(46, h / 2), t = r + 20;
+    // 회색은 왼쪽 아래, 파란색은 오른쪽 아래 꼬리
+    const tail = el.classList.contains('blue')
+      ? ` H${w - t} C${w - t - 4},${h + 9} ${w - t - 2},${h + 18} ${w - t + 12},${h + 28} C${w - t - 8},${h + 22} ${w - t - 22},${h + 12} ${w - t - 30},${h}`
+      : ` H${t + 30} C${t + 22},${h + 12} ${t + 8},${h + 22} ${t - 12},${h + 28} C${t + 2},${h + 18} ${t + 4},${h + 9} ${t},${h}`;
     const d = `M${r},0 H${w - r} A${r},${r} 0 0 1 ${w},${r} V${h - r} A${r},${r} 0 0 1 ${w - r},${h}`
-      + ` H${t + 30} C${t + 22},${h + 12} ${t + 8},${h + 22} ${t - 12},${h + 28} C${t + 2},${h + 18} ${t + 4},${h + 9} ${t},${h}`
-      + ` H${r} A${r},${r} 0 0 1 0,${h - r} V${r} A${r},${r} 0 0 1 ${r},0 Z`;
+      + tail + ` H${r} A${r},${r} 0 0 1 0,${h - r} V${r} A${r},${r} 0 0 1 ${r},0 Z`;
     el.insertAdjacentHTML('afterbegin', `<svg width="${w}" height="${h}"><path d="${d}"/></svg>`);
   });
 }
