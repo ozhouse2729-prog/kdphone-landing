@@ -61,13 +61,12 @@ function slideHtml(deck, slide, index, baseDir) {
   const desc = lines(slide.desc).map((l) => `<div>${rich(l)}</div>`).join('');
   const icon = pathToFileURL(path.join(ROOT, 'templates', `icon-${slide.tabIcon || deck.tabIcon || 'folder'}.png`));
   const asset = (p) => pathToFileURL(path.resolve(baseDir, p));
-  // 말풍선(후기) 레이아웃: bubbles = [{ side: 'left'|'right', text: [...], spark: 'left'|'right' }]
+  // 말풍선(후기) 레이아웃: bubbles = [{ tone: 'gray'|'blue', text: [...] }]
+  // 테두리는 렌더 시 drawBubbles()가 그린다
   const bubbles = (slide.bubbles || []).map((b) => `
-    <div class="bubble ${b.side || 'left'}"${b.offset ? ` style="margin-${b.side === 'right' ? 'right' : 'left'}:${b.offset}px"` : ''}>
-      ${b.spark ? `<svg class="spark ${b.spark}" viewBox="0 0 60 60"><path d="M30 6 L36 26 M8 22 L26 34 M10 52 L30 44"/></svg>` : ''}
+    <div class="bubble ${b.tone || 'gray'}">
       ${slide.avatar ? `<img class="avatar" src="${asset(slide.avatar)}">` : ''}
       <div class="say">${lines(b.text).map((l) => `<div>${rich(l)}</div>`).join('')}</div>
-      <svg class="tail" viewBox="0 0 44 34"><path class="f" d="M4 0 C6 14 20 26 42 31 C28 22 26 10 27 0 Z"/><path class="s" d="M4 0 C6 14 20 26 42 31 C28 22 26 10 27 0"/></svg>
     </div>`).join('');
   // 패널 안에 잘려 보이는 장식 이미지: side = { src, left|right, top, width, rotate }
   const side = slide.side
@@ -114,25 +113,16 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
 /* 말풍선 후기 */
 .clip { position: absolute; left: 62px; top: 179px; right: 58px; bottom: 53px; border-radius: 26px; overflow: hidden; }
 .side { position: absolute; }
-.chat { width: 100%; display: flex; flex-direction: column; gap: 24px; margin-top: 30px; }
+.chat { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 40px; margin-top: 30px; padding-left: 14px; }
 .cover.has-chat .body { top: 196px; }
 .has-chat .title div:first-child { font-size: 68px; }
 .has-chat .title div + div { font-size: 84px; }
-.bubble { position: relative; display: flex; align-items: center; gap: 26px; padding: 14px 40px 14px 20px;
-  border: 3.5px solid #111; border-radius: 48px; background: #f3f2f2; text-align: left; }
-.bubble.left { align-self: flex-start; margin-left: 10px; }
-.bubble.right { align-self: flex-end; background: #e2f0fd; margin-right: 0; }
-.avatar { width: 86px; height: 86px; flex: none; }
-.say { font-family: 'cn-body'; font-size: 29px; line-height: 1.42; color: #111; letter-spacing: -0.6px; }
-.tail { position: absolute; bottom: -29px; width: 44px; height: 34px; overflow: visible; }
-.tail .f { fill: #f3f2f2; } .right .tail .f { fill: #e2f0fd; }
-.tail .s { fill: none; stroke: #111; stroke-width: 3.5px; stroke-linejoin: round; }
-.left .tail { left: 46px; transform: scaleX(-1); }
-.right .tail { right: 46px; }
-.spark { position: absolute; width: 60px; height: 60px; }
-.spark path { stroke: #111; stroke-width: 5px; stroke-linecap: round; fill: none; }
-.spark.right { right: -78px; top: -20px; transform: scaleX(-1); }
-.spark.left { left: -78px; bottom: -14px; transform: scaleY(-1); }
+.bubble { position: relative; isolation: isolate; display: flex; align-items: center; gap: 20px; padding: 14px 34px 14px 18px; text-align: left; }
+.bubble > svg { position: absolute; left: 0; top: 0; z-index: -1; overflow: visible; }
+.bubble path { fill: #f3f2f2; stroke: #111; stroke-width: 3.5px; stroke-linejoin: round; }
+.bubble.blue path { fill: #e2f0fd; }
+.avatar { width: 76px; height: 76px; flex: none; }
+.say { font-family: 'cn-body'; font-size: 27px; line-height: 1.42; color: #111; letter-spacing: -0.6px; }
 </style></head><body class="${tpl}${bubbles ? ' has-chat' : ''}">
   ${side}
   <div class="tab">${(slide.tabIcon ?? deck.tabIcon) === false ? '' : `<img class="ico" src="${icon}">`}<span>${esc(slide.tab || deck.tab || '')}</span></div>
@@ -143,6 +133,17 @@ body { background: url('${frame}') 0 0 / ${SIZE}px ${SIZE}px no-repeat; position
     ${desc ? `<div class="desc">${desc}</div>` : ''}
   </div>
 </body></html>`;
+}
+
+// 브라우저 안에서 실행: 말풍선 몸통+꼬리를 하나의 경로로 그린다(테두리 두께 일정)
+function drawBubbles() {
+  document.querySelectorAll('.bubble').forEach((el) => {
+    const w = el.offsetWidth, h = el.offsetHeight, r = Math.min(46, h / 2), t = r + 20;
+    const d = `M${r},0 H${w - r} A${r},${r} 0 0 1 ${w},${r} V${h - r} A${r},${r} 0 0 1 ${w - r},${h}`
+      + ` H${t + 30} C${t + 22},${h + 12} ${t + 8},${h + 22} ${t - 12},${h + 28} C${t + 2},${h + 18} ${t + 4},${h + 9} ${t},${h}`
+      + ` H${r} A${r},${r} 0 0 1 0,${h - r} V${r} A${r},${r} 0 0 1 ${r},0 Z`;
+    el.insertAdjacentHTML('afterbegin', `<svg width="${w}" height="${h}"><path d="${d}"/></svg>`);
+  });
 }
 
 async function main() {
@@ -158,6 +159,7 @@ async function main() {
     fs.writeFileSync(htmlPath, slideHtml(deck, slide, i, projectDir));
     await page.goto(pathToFileURL(htmlPath).href);
     await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(drawBubbles);
     const out = path.join(outDir, `${String(i + 1).padStart(2, '0')}.png`);
     await page.screenshot({ path: out });
     fs.unlinkSync(htmlPath);
