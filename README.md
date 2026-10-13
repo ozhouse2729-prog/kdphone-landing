@@ -11,3 +11,6 @@
 - **기종·가격**: `assets/main.js`의 `PHONES` 배열 (출고가, 공시지원금, 가입유형별 추가지원금)
 - **상담 접수 서버**: `assets/main.js`의 `FORM_ENDPOINT`에 주소를 넣으면 JSON으로 POST 전송합니다. 비워두면 완료 모달만 띄웁니다.
 - **전화번호·사업자 정보**: `index.html`의 `1600-0000`, 푸터 `address`
+
+## 인스타 카드뉴스 제작 도구
+`kdphone-cardnews/` 폴더: 원고를 주면 폴더 양식 위에 카드뉴스 이미지(1080px)를 만드는 Claude Code 작업 폴더입니다. 사용법은 `kdphone-cardnews/README.md`, 규칙은 `kdphone-cardnews/CLAUDE.md` 참고.

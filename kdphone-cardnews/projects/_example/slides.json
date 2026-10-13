@@ -1,0 +1,94 @@
+{
+  "topic": "아이폰18 프로 틱 소리 결함 (예시·테스트용)",
+  "slides": [
+    {
+      "frame": "cover",
+      "label": "iPhone 18 Pro.zip",
+      "kicker": "이번에는 원인 불명 '틱' 소리...?",
+      "headline": [
+        "결함 이어지는",
+        "[[아이폰18 프로]]"
+      ],
+      "highlight_color": "cream",
+      "candidates": {
+        "A": {
+          "image": "images/test_bleed.png",
+          "layout": "top-bleed"
+        },
+        "B": {
+          "image": "images/test_cut.png",
+          "layout": "top-right",
+          "tweak": {
+            "image_w": 560,
+            "image_h": 520
+          }
+        },
+        "C": {
+          "image": "images/test_cut.png",
+          "layout": "top-bottom",
+          "tweak": {
+            "image_h": 520
+          }
+        }
+      },
+      "selected": "A"
+    },
+    {
+      "frame": "content",
+      "label": "Overseas_Report.jpg",
+      "headline": [
+        "국내뿐 아니라 해외에서도",
+        "[[유사한 제보 확산]]"
+      ],
+      "highlight_color": "pink",
+      "body": "해외 IT 매체들도 아이폰18 프로·프로맥스에서\n원인 불명의 '틱' 또는 '딸깍' 소리가 발생한다는\n제보가 이어지고 있다고 보도했습니다.",
+      "tweak": {
+        "headline_scale": 0.82
+      },
+      "candidates": {
+        "A": {
+          "image": "images/test_cut.png",
+          "layout": "top-right"
+        },
+        "B": {
+          "image": "images/test_bleed.png",
+          "layout": "top-bleed",
+          "tweak": {
+            "image_h": 470
+          }
+        },
+        "C": {
+          "image": "images/test_cut.png",
+          "layout": "top-left",
+          "tweak": {
+            "image_w": 520,
+            "image_h": 480
+          }
+        }
+      },
+      "selected": "B"
+    },
+    {
+      "frame": "content",
+      "label": "KDphone.zip",
+      "label_icon": "folder",
+      "layout": "left-right",
+      "headline": [
+        "[[국대폰]]과 함께",
+        "더 많은 [[IT소식]]",
+        "빠르게 받아보세요."
+      ],
+      "highlight_color": "blue",
+      "body": "핸드폰부터 인터넷, 유용한 IT 소식까지\n한 번에 확인할 수 있어요!",
+      "image": "assets/outro_folder_menu.png",
+      "image_blend": "multiply",
+      "tweak": {
+        "headline_scale": 1.0,
+        "image_w": 540,
+        "image_h": 476,
+        "image_x": -30,
+        "image_y": -22
+      }
+    }
+  ]
+}

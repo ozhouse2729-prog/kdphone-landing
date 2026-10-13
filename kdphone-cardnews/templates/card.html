@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<style>
+/*__FONTFACES__*/
+:root{
+  --head-font: "KDHead","Black Han Sans","Noto Sans CJK KR","Noto Sans KR",sans-serif;
+  --body-font: "KDBody","Pretendard","Noto Sans CJK KR","Noto Sans KR",sans-serif;
+  --ink:#111; --blue:#1F6BFF;
+  --pink:#F7B4B4; --kdblue:#5B7FE6; --sky:#BFDCF8; --cream:#FFF0A8; --white:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1254px;height:1254px;overflow:hidden;background:#fff}
+#card{position:relative;width:1254px;height:1254px}
+#frame{position:absolute;inset:0;width:1254px;height:1254px;z-index:0}
+
+/* 프레임 안쪽 영역 (이미지·텍스트가 들어가는 곳) */
+#inner{position:absolute;overflow:hidden;z-index:1}
+.f-content #inner{left:90px;top:186px;width:1076px;height:990px;border-radius:0 0 30px 30px}
+.f-cover   #inner{left:67px;top:208px;width:1121px;height:986px;border-radius:26px}
+
+/* 헤더: 파일명 라벨 + 페이지 */
+#label{position:absolute;z-index:3;display:flex;align-items:center;gap:22px;
+  font-family:var(--body-font);font-weight:600;font-size:39px;letter-spacing:-.02em;color:var(--ink)}
+.f-content #label{left:110px;top:112px;height:62px}
+.f-cover   #label{left:126px;top:110px;height:62px}
+#label svg{width:58px;height:58px;flex:none}
+#page{position:absolute;z-index:3;right:114px;top:122px;height:56px;line-height:56px;
+  font-family:var(--body-font);font-weight:800;font-size:34px;color:var(--blue);letter-spacing:-.01em}
+
+/* 텍스트 블록 */
+#text{position:absolute;z-index:4;
+  transform:translate(var(--tx,0px),var(--ty,0px))}
+#kicker{font-family:var(--body-font);font-weight:600;font-size:calc(46px*var(--ks,1));
+  letter-spacing:-.03em;color:var(--ink);margin-bottom:14px}
+#headline{font-family:var(--head-font);font-weight:900;
+  font-size:calc(var(--hbase,118px)*var(--hs,1));line-height:1.08;letter-spacing:-.045em;
+  color:#fff;-webkit-text-stroke:calc(var(--hbase,118px)*var(--hs,1)*.13) var(--ink);paint-order:stroke fill;
+  transform:translate(var(--hx,0px),var(--hy,0px))}
+#headline .hl{color:var(--hlc,var(--pink))}
+#headline .line{display:block;white-space:nowrap}
+#body{font-family:var(--body-font);font-weight:500;font-size:calc(40px*var(--bs,1));
+  line-height:1.38;letter-spacing:-.035em;color:#222;margin-top:26px;white-space:pre-line;
+  transform:translate(var(--bx,0px),var(--by,0px))}
+
+/* 이미지 */
+#img{position:absolute;z-index:2;
+  transform:translate(var(--ix,0px),var(--iy,0px)) scale(var(--is,1)) rotate(var(--ir,0deg));
+  transform-origin:var(--io,center bottom)}
+#img img{width:100%;height:100%;display:block;object-fit:var(--fit,contain);object-position:var(--op,center bottom)}
+#img.blend-multiply img{mix-blend-mode:multiply}
+#img.fade-top{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--fade,22%))}
+#extra{position:absolute;inset:0;z-index:5}
+
+/* ===== 레이아웃 (좌표는 #inner 기준) ===== */
+/* A. 위 텍스트 · 아래 큰 이미지 */
+.L-top-bottom #text{left:0;right:0;top:44px;text-align:center;padding:0 50px}
+.L-top-bottom #img{left:0;right:0;bottom:0;height:var(--ih,600px)}
+/* B. 위 텍스트 · 오른쪽 아래 이미지 */
+.L-top-right #text{left:0;right:0;top:44px;text-align:center;padding:0 50px}
+.L-top-right #img{right:0;bottom:0;width:var(--iw,640px);height:var(--ih,600px);--op:right bottom;--io:right bottom}
+/* C. 위 텍스트 · 왼쪽 아래 이미지 */
+.L-top-left #text{left:0;right:0;top:44px;text-align:center;padding:0 50px}
+.L-top-left #img{left:0;bottom:0;width:var(--iw,640px);height:var(--ih,600px);--op:left bottom;--io:left bottom}
+/* D. 왼쪽 정렬 텍스트 · 오른쪽 이미지 */
+.L-left-right #text{left:66px;top:40px;width:900px;text-align:left}
+.L-left-right #img{right:0;bottom:0;width:var(--iw,600px);height:var(--ih,560px);--op:right bottom;--io:right bottom}
+/* E. 위 텍스트 · 아래 풀블리드(장면) 이미지, 위쪽 페이드 */
+.L-top-bleed #text{left:0;right:0;top:44px;text-align:center;padding:0 50px}
+.L-top-bleed #img{left:0;right:0;bottom:0;height:var(--ih,640px);--fit:cover;--op:center center}
+/* F. 배경 전체 이미지 + 텍스트 (텍스트 가독성은 이미지 자체 여백으로 확보) */
+.L-full-bg #text{left:0;right:0;top:44px;text-align:center;padding:0 50px}
+.L-full-bg #img{inset:0;--fit:cover;--op:center center}
+/* G. 텍스트만 (말풍선·도표 등은 extra_html) */
+.L-text-only #text{left:0;right:0;top:44px;text-align:center;padding:0 50px}
+.L-text-only #img{display:none}
+
+.f-cover{--hbase:150px}
+</style></head>
+<body><div id="card"><img id="frame"><div id="label"></div><div id="page"></div>
+<div id="inner"><div id="img"><img id="imgsrc"></div><div id="text"><div id="kicker"></div><div id="headline"></div><div id="body"></div></div><div id="extra"></div></div>
+</div>
+<script>
+const S = /*__SPEC__*/{};
+const card=document.getElementById('card');
+card.classList.add('f-'+(S.frame||'content'),'L-'+(S.layout||'top-bottom'));
+document.getElementById('frame').src=S.__frame_src;
+const ICONS={
+ image:'<svg viewBox="0 0 58 58"><rect x="3" y="3" width="52" height="52" rx="6" fill="#fff" stroke="#111" stroke-width="4"/><path d="M5 52 L24 30 L36 42 L44 35 L53 44 L53 53 L5 53Z" fill="#2E7BF6"/><circle cx="42" cy="17" r="7" fill="#fff" stroke="#111" stroke-width="3"/></svg>',
+ folder:'<svg viewBox="0 0 58 58"><path d="M4 12h18l5 6h27v32H4z" fill="#F7C51E" stroke="#111" stroke-width="2"/><rect x="4" y="20" width="50" height="30" rx="3" fill="#FFD84A" stroke="#111" stroke-width="2"/><rect x="8" y="16" width="20" height="4" fill="#1F9BFF"/></svg>',
+ none:''};
+document.getElementById('label').innerHTML=(ICONS[S.label_icon||(S.frame==='cover'?'none':'image')]||'')+'<span>'+(S.label||'')+'</span>';
+document.getElementById('page').textContent=S.page||'';
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const hl=s=>esc(s).replace(/\[\[(.+?)\]\]/g,'<span class="hl">$1</span>');
+const k=document.getElementById('kicker'); if(S.kicker){k.innerHTML=hl(S.kicker)}else k.remove();
+document.getElementById('headline').innerHTML=(S.headline||[]).map(l=>'<span class="line">'+hl(l)+'</span>').join('');
+const b=document.getElementById('body'); if(S.body){b.innerHTML=hl(S.body)}else b.remove();
+const im=document.getElementById('img');
+if(S.__img_src){document.getElementById('imgsrc').src=S.__img_src}else im.style.display='none';
+const blend=S.image_blend||((S.layout==='top-bleed'||S.layout==='full-bg')?'normal':'multiply');
+if(blend==='multiply')im.classList.add('blend-multiply');
+if(S.layout==='top-bleed'&&S.fade!==false)im.classList.add('fade-top');
+if(S.extra_html)document.getElementById('extra').innerHTML=S.extra_html;
+const C={pink:'var(--pink)',blue:'var(--kdblue)',sky:'var(--sky)',cream:'var(--cream)',white:'#fff'};
+card.style.setProperty('--hlc',C[S.highlight_color]||S.highlight_color||'var(--pink)');
+// tweak: 디테일 조정값 → CSS 변수
+const T=S.tweak||{}, px=v=>v+'px';
+const map={headline_scale:['--hs',x=>x],headline_x:['--hx',px],headline_y:['--hy',px],
+ kicker_scale:['--ks',x=>x],body_scale:['--bs',x=>x],body_x:['--bx',px],body_y:['--by',px],
+ text_x:['--tx',px],text_y:['--ty',px],image_x:['--ix',px],image_y:['--iy',px],image_scale:['--is',x=>x],
+ image_rotate:['--ir',x=>x+'deg'],image_w:['--iw',px],image_h:['--ih',px],image_fit:['--fit',x=>x],
+ image_pos:['--op',x=>x],fade:['--fade',x=>x+'%'],headline_base:['--hbase',px]};
+for(const [key,v] of Object.entries(T)){if(map[key]){const [n,f]=map[key];card.style.setProperty(n,f(v));im.style.setProperty(n,f(v))}}
+document.body.dataset.ready='1';
+</script></body></html>

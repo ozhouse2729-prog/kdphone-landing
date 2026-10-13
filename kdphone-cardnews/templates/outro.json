@@ -1,0 +1,22 @@
+{
+  "frame": "content",
+  "label": "KDphone.zip",
+  "label_icon": "folder",
+  "layout": "left-right",
+  "headline": [
+    "[[국대폰]]과 함께",
+    "더 많은 [[IT소식]]",
+    "빠르게 받아보세요."
+  ],
+  "highlight_color": "blue",
+  "body": "핸드폰부터 인터넷, 유용한 IT 소식까지\n한 번에 확인할 수 있어요!",
+  "image": "assets/outro_folder_menu.png",
+  "image_blend": "multiply",
+  "tweak": {
+    "headline_scale": 1.0,
+    "image_w": 540,
+    "image_h": 476,
+    "image_x": -30,
+    "image_y": -22
+  }
+}
