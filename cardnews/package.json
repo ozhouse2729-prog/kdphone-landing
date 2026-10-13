@@ -1,0 +1,13 @@
+{
+  "name": "kdphone-cardnews",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/noto-sans-kr": "5.2.5",
+    "@noonnu/gmarket-sans-medium": "0.1.0",
+    "playwright": "1.56.1"
+  }
+}
