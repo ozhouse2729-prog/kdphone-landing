@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>render</title>
+  <link rel="stylesheet" href="fonts.css" />
+  <link rel="stylesheet" href="cards.css" />
+  <style>
+    body { margin: 0; background: #111; }
+    #deck { display: flex; flex-direction: column; gap: 0; width: 1080px; }
+  </style>
+</head>
+<body>
+  <div id="deck"></div>
+  <script src="rules.js"></script>
+  <script src="engine.js"></script>
+  <script>
+    // scripts/render.js가 호출: 검사 + 렌더 + 넘침 검사 → 위반 목록 반환
+    window.runCards = async (data, imgs, focus) => {
+      const E = window.CardEngine;
+      const errors = E.validate(data);
+      const deck = document.getElementById("deck");
+      deck.innerHTML = E.render(data, imgs, focus).join("");
+      await document.fonts.ready;
+      await Promise.all([...deck.querySelectorAll("img")].map((i) => i.decode().catch(() => {})));
+      const fontOk = ["500", "800", "900"].every((w) => document.fonts.check(`${w} 40px Pretendard`));
+      return { errors: [...errors, ...E.checkOverflow(deck, !!imgs.cover)], fontOk };
+    };
+  </script>
+</body>
+</html>

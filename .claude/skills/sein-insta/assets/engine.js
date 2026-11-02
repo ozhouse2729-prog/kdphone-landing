@@ -1,13 +1,10 @@
 /* =========================================================
-   카드뉴스 스튜디오: JSON 검사 → 렌더 → 넘침 검사 → PNG 저장
+   카드뉴스 엔진 — 규칙 검사 · 렌더 · 넘침 검사
+   studio.html(수동)과 render.html(자동 스크립트)이 함께 씀
    ========================================================= */
 (() => {
   const R = window.CARD_RULES;
-  const $ = (id) => document.getElementById(id);
-  const state = { data: null, img1: null, img2: null, errors: [] };
-  const STORE_KEY = "cardnews.json";
 
-  /* ---------- 유틸 ---------- */
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const plain = (s) => String(s).replace(/\[\[|\]\]/g, "");
   const len = (s) => [...plain(s)].length;
@@ -119,16 +116,18 @@
   }
 
   /* ---------- 2. 렌더 ---------- */
-  const photoStyle = () => {
-    const x = $("fx").value, y = $("fy").value, z = $("fz").value / 100;
+  // focus: { x: 0~100, y: 0~100, zoom: 100~200 } — 1p 사진에서 보여줄 위치
+  const photoStyle = (f = {}) => {
+    const x = f.x ?? 50, y = f.y ?? 40, z = (f.zoom ?? 100) / 100;
     return `object-position:${x}% ${y}%;transform:scale(${z});transform-origin:${x}% ${y}%`;
   };
 
-  function render(d) {
+  // 3장의 카드 HTML 배열을 돌려줌. imgs: { cover, bg } (data URL)
+  function render(d, imgs = {}, focus = {}) {
     const g = (o, k, def = "") => (isObj(o) && o[k] != null ? o[k] : def);
     const list = (v) => (Array.isArray(v) ? v : []);
     const c = g(d, "cover", {}), t = g(d, "detail", {}), s = g(d, "summary", {}), m = g(d, "meta", {});
-    const bg = state.img2 || state.img1;
+    const bg = imgs.bg || imgs.cover;
     const bgLayer = `${bg ? `<img class="c-bgphoto" src="${bg}" alt="">` : ""}<div class="c-bgtint"></div>`;
     const handle = `<div class="c-handle">${esc(R.handle)}</div>`;
     const src = list(m.sources).map((x) => plain(g(x, "name"))).filter(Boolean);
@@ -136,7 +135,7 @@
 
     const p1 = `
       <div class="card p1">
-        ${state.img1 ? `<img class="c-photo" src="${state.img1}" style="${photoStyle()}" alt="">` : `<div class="c-placeholder">커버 사진을 넣어주세요</div>`}
+        ${imgs.cover ? `<img class="c-photo" src="${imgs.cover}" style="${photoStyle(focus)}" alt="">` : `<div class="c-placeholder">커버 사진을 넣어주세요</div>`}
         <div class="c-scrim"></div>
         <div class="c-logo">${esc(R.brand)}</div>
         <div class="c-body" data-check="1p 제목">
@@ -179,98 +178,21 @@
         ${handle}
       </div>`;
 
-    $("deck").innerHTML = [p1, p2, p3].map((h) => `<div class="frame">${h}</div>`).join("");
-    $("brief").textContent = c.imageBrief ? `찾을 사진: ${c.imageBrief}` : "사진 가이드가 여기에 표시됩니다.";
+    return [p1, p2, p3];
   }
 
   /* ---------- 3. 디자인 넘침 검사 (글자 수가 맞아도 실제로 넘치면 막음) ---------- */
-  function checkOverflow() {
+  function checkOverflow(root, hasCover) {
     const E = [];
-    document.querySelectorAll("[data-check]").forEach((el) => {
+    root.querySelectorAll("[data-check]").forEach((el) => {
       if (el.scrollHeight > el.clientHeight + 1) E.push(`${el.dataset.check}: 내용이 카드 밖으로 넘침 (${el.scrollHeight - el.clientHeight}px) → 문장을 줄일 것`);
     });
-    document.querySelectorAll("[data-check-x]").forEach((el) => {
+    root.querySelectorAll("[data-check-x]").forEach((el) => {
       if (el.scrollWidth > el.clientWidth + 1) E.push(`${el.dataset.checkX}: 가로로 넘침 → 더 짧게 쓸 것`);
     });
-    if (!state.img1) E.push("1p 커버 사진이 없음 (사진을 넣어주세요)");
+    if (!hasCover) E.push("1p 커버 사진이 없음 (사진을 넣어주세요)");
     return E;
   }
 
-  /* ---------- 상태 표시 ---------- */
-  function showStatus() {
-    const box = $("status");
-    if (!state.errors.length) {
-      box.className = "status ok";
-      box.textContent = "모든 규칙 통과. 저장할 수 있습니다.";
-    } else {
-      box.className = "status bad";
-      box.innerHTML = `규칙 위반 ${state.errors.length}건<ul>${state.errors.map((e) => `<li>${esc(e)}</li>`).join("")}</ul>`;
-    }
-    $("export").disabled = state.errors.length > 0;
-  }
-
-  async function run() {
-    let d;
-    const raw = $("json").value.trim().replace(/^```(json)?\s*|\s*```$/g, "");
-    try { d = JSON.parse(raw); } catch (e) {
-      state.errors = [`JSON 형식 오류: ${e.message} (설명 문장 없이 JSON만 받아야 함)`];
-      return showStatus();
-    }
-    try { localStorage.setItem(STORE_KEY, raw); } catch (_) {}
-    state.data = d;
-    const contentErrors = validate(d);
-    render(d);
-    await document.fonts.ready;
-    await Promise.all([...document.querySelectorAll("#deck img")].map((i) => i.decode().catch(() => {})));
-    state.errors = [...contentErrors, ...checkOverflow()];
-    showStatus();
-  }
-
-  /* ---------- 사진 ---------- */
-  const readImg = (input, key) => input.addEventListener("change", () => {
-    const f = input.files[0]; if (!f) return;
-    const fr = new FileReader();
-    fr.onload = () => { state[key] = fr.result; run(); };
-    fr.readAsDataURL(f);
-  });
-  readImg($("img1"), "img1");
-  readImg($("img2"), "img2");
-  ["fx", "fy", "fz"].forEach((id) => $(id).addEventListener("input", () => {
-    const img = document.querySelector(".p1 .c-photo"); if (img) img.setAttribute("style", photoStyle());
-  }));
-
-  /* ---------- 저장 ---------- */
-  $("export").addEventListener("click", async () => {
-    const btn = $("export");
-    btn.disabled = true; btn.textContent = "저장 중…";
-    try {
-      const slug = plain(state.data.meta.product).replace(/\s+/g, "");
-      const cards = document.querySelectorAll("#deck .card");
-      for (let i = 0; i < cards.length; i++) {
-        const blob = await htmlToImage.toBlob(cards[i], { width: 1080, height: 1350, pixelRatio: 1, style: { transform: "none" } });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `${state.data.meta.date}_${slug}_${i + 1}.png`;
-        document.body.appendChild(a); a.click(); a.remove();
-        await new Promise((r) => setTimeout(r, 400)); // 연속 다운로드 차단 방지
-      }
-    } catch (e) { alert("저장 실패: " + e.message); }
-    btn.textContent = "PNG 3장 저장"; btn.disabled = state.errors.length > 0;
-  });
-
-  /* ---------- 수정 프롬프트 ---------- */
-  $("copyFix").addEventListener("click", async () => {
-    const msg = `아래 JSON이 카드뉴스 규칙 검사에서 탈락했어. 위반 항목만 고쳐서 JSON 전체를 다시 출력해. 설명·인사·코드블록 없이 JSON만. 위반 안 한 칸은 한 글자도 바꾸지 마.\n\n[위반 목록]\n${state.errors.map((e) => "- " + e).join("\n")}\n\n[현재 JSON]\n${$("json").value.trim()}`;
-    try { await navigator.clipboard.writeText(msg); $("copyFix").textContent = "복사됨"; }
-    catch (_) { prompt("복사해서 AI에게 보내세요", msg); }
-    setTimeout(() => ($("copyFix").textContent = "수정 프롬프트 복사"), 1500);
-  });
-
-  /* ---------- 시작 ---------- */
-  $("apply").addEventListener("click", run);
-  $("loadSample").addEventListener("click", () => {
-    $("json").value = JSON.stringify(window.CARD_SAMPLE, null, 2);
-    run();
-  });
-  try { const saved = localStorage.getItem(STORE_KEY); if (saved) { $("json").value = saved; run(); } } catch (_) {}
+  window.CardEngine = { validate, render, checkOverflow, photoStyle, plain };
 })();
