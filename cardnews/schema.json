@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "IT 카드뉴스 3p",
-  "description": "글자 수는 공백 포함, [[ ]] 제외 기준. maxLength는 [[ ]] 4자를 더한 여유값이며 정확한 검사는 studio.html이 한다.",
+  "description": "글자 수는 공백 포함, [[ ]] 제외 기준. 형광펜 칸의 maxLength는 [[ ]] 기호만큼 여유를 둔 값이며 정확한 검사는 studio.html이 한다.",
   "type": "object",
   "additionalProperties": false,
   "required": ["meta", "cover", "detail", "summary"],
@@ -27,52 +27,40 @@
     },
     "cover": {
       "type": "object", "additionalProperties": false,
-      "required": ["tag", "kicker", "title", "imageBrief"],
+      "required": ["title", "imageBrief"],
       "properties": {
-        "tag": { "enum": ["신제품", "출시확정", "가격", "업데이트", "루머", "유출", "비교", "이슈"] },
-        "kicker": { "type": "string", "minLength": 1, "maxLength": 16 },
-        "title": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "type": "string", "minLength": 1, "maxLength": 13 } },
+        "title": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "string", "minLength": 1, "maxLength": 11 } },
         "imageBrief": { "type": "string", "minLength": 1, "maxLength": 80 }
       }
     },
     "detail": {
       "type": "object", "additionalProperties": false,
-      "required": ["headline", "lead", "points"],
+      "required": ["headline", "paras", "conclusion"],
       "properties": {
-        "headline": { "type": "string", "minLength": 1, "maxLength": 20 },
-        "lead": { "type": "string", "minLength": 1, "maxLength": 48 },
-        "points": {
-          "type": "array", "minItems": 3, "maxItems": 3,
-          "items": {
-            "type": "object", "additionalProperties": false, "required": ["label", "text"],
-            "properties": {
-              "label": { "type": "string", "minLength": 1, "maxLength": 8 },
-              "text": { "type": "string", "minLength": 1, "maxLength": 32 }
-            }
-          }
-        }
+        "headline": { "type": "string", "minLength": 1, "maxLength": 30 },
+        "paras": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string", "minLength": 1, "maxLength": 64 } },
+        "conclusion": { "type": "string", "minLength": 1, "maxLength": 34 }
       }
     },
     "summary": {
       "type": "object", "additionalProperties": false,
-      "required": ["headline", "compareWith", "rows", "cons", "verdict"],
+      "required": ["headline", "compareWith", "rows", "cons", "conclusion"],
       "properties": {
-        "headline": { "type": "string", "minLength": 1, "maxLength": 14 },
+        "headline": { "type": "string", "minLength": 1, "maxLength": 30 },
         "compareWith": { "type": "string", "minLength": 1, "maxLength": 14 },
         "rows": {
-          "type": "array", "minItems": 4, "maxItems": 4,
+          "type": "array", "minItems": 3, "maxItems": 3,
           "items": {
-            "type": "object", "additionalProperties": false, "required": ["item", "prev", "next", "change"],
+            "type": "object", "additionalProperties": false, "required": ["item", "prev", "next"],
             "properties": {
               "item": { "type": "string", "minLength": 1, "maxLength": 5 },
-              "prev": { "type": "string", "minLength": 1, "maxLength": 12 },
-              "next": { "type": "string", "minLength": 1, "maxLength": 12 },
-              "change": { "enum": ["up", "down", "same", "new"] }
+              "prev": { "type": "string", "minLength": 1, "maxLength": 11 },
+              "next": { "type": "string", "minLength": 1, "maxLength": 11 }
             }
           }
         },
         "cons": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string", "minLength": 1, "maxLength": 24 } },
-        "verdict": { "type": "string", "minLength": 1, "maxLength": 26 }
+        "conclusion": { "type": "string", "minLength": 1, "maxLength": 34 }
       }
     }
   }

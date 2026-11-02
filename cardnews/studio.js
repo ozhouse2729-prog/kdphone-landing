@@ -28,7 +28,7 @@
     };
 
     // 텍스트 한 칸 검사
-    const text = (v, path, max, hl = R.highlight.elsewhere) => {
+    const text = (v, path, max, hl = R.highlight.elsewhere, allowQuotes = false) => {
       if (typeof v !== "string") return err(path, "문자열이어야 함");
       if (!plain(v).trim()) return err(path, "비어 있음");
       const n = len(v);
@@ -36,7 +36,8 @@
       const opens = (v.match(/\[\[/g) || []).length, closes = (v.match(/\]\]/g) || []).length;
       if (opens !== closes) err(path, "[[ ]] 짝이 맞지 않음");
       const h = hlCount(v);
-      if (h < hl[0] || h > hl[1]) err(path, hl[1] === 0 ? "이 칸은 [[강조]] 금지" : `[[강조]]는 ${hl[0]}~${hl[1]}개 (현재 ${h}개)`);
+      if (h < hl[0] || h > hl[1]) err(path, hl[1] === 0 ? "이 칸은 [[형광펜]] 금지" : `[[형광펜]]은 ${hl[0]}~${hl[1]}개 (현재 ${h}개)`);
+      if (!allowQuotes && /[“”]/.test(v)) err(path, "따옴표 “ ” 금지 (2p 제목 따옴표는 자동으로 붙음)");
       R.bannedWords.forEach((w) => { if (plain(v).includes(w)) err(path, `금지어 "${w}"`); });
       R.bannedPatterns.forEach((p) => { if (p.re.test(plain(v))) err(path, p.msg); });
       return h;
@@ -46,7 +47,6 @@
       if (v.length < min || v.length > max) err(path, min === max ? `정확히 ${min}개여야 함 (현재 ${v.length}개)` : `${min}~${max}개여야 함 (현재 ${v.length}개)`);
       return true;
     };
-    const oneOf = (v, path, list) => { if (!list.includes(v)) err(path, `"${v}" 불가 → ${list.join(" / ")} 중 하나`); };
 
     if (!keysExact(d, "최상위", ["meta", "cover", "detail", "summary"])) return E;
 
@@ -54,7 +54,7 @@
     const m = d.meta;
     if (keysExact(m, "meta", ["product", "status", "date", "sources"])) {
       text(m.product, "meta.product", R.len.product);
-      oneOf(m.status, "meta.status", R.enums.status);
+      if (!R.enums.status.includes(m.status)) err("meta.status", `"${m.status}" 불가 → ${R.enums.status.join(" / ")} 중 하나`);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(m.date || "") || isNaN(Date.parse(m.date))) err("meta.date", "YYYY-MM-DD 형식");
       if (arr(m.sources, "meta.sources", R.count.sourcesMin, R.count.sourcesMax)) {
         m.sources.forEach((s, i) => {
@@ -66,74 +66,59 @@
       }
     }
 
-    // cover
+    // cover (예시 1: 3~4줄 흰 제목, 따옴표 한 쌍까지)
     const c = d.cover;
-    if (keysExact(c, "cover", ["tag", "kicker", "title", "imageBrief"])) {
-      oneOf(c.tag, "cover.tag", R.enums.tag);
-      if (isObj(m) && m.status && m.status !== "공식" && c.tag !== m.status) err("cover.tag", `meta.status가 "${m.status}"이면 태그도 "${m.status}"여야 함`);
-      if (isObj(m) && m.status === "공식" && R.rumorTags.includes(c.tag)) err("cover.tag", `공식 발표인데 "${c.tag}" 태그 사용 불가`);
-      text(c.kicker, "cover.kicker", R.len.kicker);
+    if (keysExact(c, "cover", ["title", "imageBrief"])) {
       text(c.imageBrief, "cover.imageBrief", R.len.imageBrief);
       if (arr(c.title, "cover.title", R.count.titleLinesMin, R.count.titleLinesMax)) {
-        let total = 0;
-        c.title.forEach((t, i) => { total += text(t, `cover.title[${i}]`, R.len.titleLine, [0, 1]) || 0; });
-        if (total !== R.highlight.title[0]) err("cover.title", `제목 전체에서 [[강조]]는 정확히 1개 (현재 ${total}개)`);
-        const q = c.title.join("").split("?").length - 1;
-        if (q > 1) err("cover.title", "물음표는 최대 1개");
+        c.title.forEach((t, i) => text(t, `cover.title[${i}]`, R.len.titleLine, R.highlight.title, true));
+        const all = c.title.join("\n");
+        const o = (all.match(/“/g) || []).length, cl = (all.match(/”/g) || []).length;
+        if (o > 1 || cl > 1 || o !== cl) err("cover.title", "따옴표는 “ ” 한 쌍만 (여는 것·닫는 것 각 1개)");
+        if (o === 1 && cl === 1) {
+          const oi = c.title.findIndex((l) => l.includes("“")), ci = c.title.findIndex((l) => l.includes("”"));
+          if (!c.title[oi].startsWith("“")) err(`cover.title[${oi}]`, "여는 따옴표 “는 줄 맨 앞에");
+          if (!c.title[ci].endsWith("”")) err(`cover.title[${ci}]`, "닫는 따옴표 ”는 줄 맨 끝에");
+          if (ci < oi) err("cover.title", "닫는 따옴표가 여는 따옴표보다 앞에 있음");
+        }
+        if ((all.match(/\?/g) || []).length > 1) err("cover.title", "물음표는 최대 1개");
+        if (/[.]$/m.test(all)) err("cover.title", "제목 줄 끝 마침표 금지");
+        if (isObj(m) && m.status && m.status !== "공식" && !R.rumorWords.some((w) => all.includes(w)))
+          err("cover.title", `${m.status} 기사는 제목에 ${R.rumorWords.join("/")} 중 하나를 넣을 것`);
       }
     }
 
-    // detail
+    // detail (예시 2)
     const t = d.detail;
-    if (keysExact(t, "detail", ["headline", "lead", "points"])) {
-      text(t.headline, "detail.headline", R.len.detailHeadline, R.highlight.detailHeadline);
-      text(t.lead, "detail.lead", R.len.lead);
-      if (arr(t.points, "detail.points", R.count.points, R.count.points)) {
-        let total = 0;
-        t.points.forEach((p, i) => {
-          const path = `detail.points[${i}]`;
-          if (!keysExact(p, path, ["label", "text"])) return;
-          text(p.label, `${path}.label`, R.len.pointLabel);
-          total += text(p.text, `${path}.text`, R.len.pointText, [0, 1]) || 0;
-        });
-        const [a, b] = R.highlight.pointsTotal;
-        if (total < a || total > b) err("detail.points", `포인트 3개 합쳐 [[강조]]는 최대 ${b}개 (현재 ${total}개)`);
-      }
+    if (keysExact(t, "detail", ["headline", "paras", "conclusion"])) {
+      text(t.headline, "detail.headline", R.len.headline, R.highlight.headline);
+      if (arr(t.paras, "detail.paras", R.count.paras, R.count.paras))
+        t.paras.forEach((p, i) => text(p, `detail.paras[${i}]`, R.len.para, R.highlight.para));
+      text(t.conclusion, "detail.conclusion", R.len.conclusion);
     }
 
     // summary
     const s = d.summary;
-    if (keysExact(s, "summary", ["headline", "compareWith", "rows", "cons", "verdict"])) {
-      text(s.headline, "summary.headline", R.len.summaryHeadline);
+    if (keysExact(s, "summary", ["headline", "compareWith", "rows", "cons", "conclusion"])) {
+      text(s.headline, "summary.headline", R.len.headline, R.highlight.headline);
       text(s.compareWith, "summary.compareWith", R.len.compareWith);
       if (isObj(m) && plain(s.compareWith || "") === plain(m.product || "")) err("summary.compareWith", "비교 대상이 이번 제품과 같음");
       if (arr(s.rows, "summary.rows", R.count.rows, R.count.rows)) {
         s.rows.forEach((r, i) => {
           const p = `summary.rows[${i}]`;
-          if (!keysExact(r, p, ["item", "prev", "next", "change"])) return;
+          if (!keysExact(r, p, ["item", "prev", "next"])) return;
           text(r.item, `${p}.item`, R.len.rowItem);
           text(r.prev, `${p}.prev`, R.len.rowValue);
           text(r.next, `${p}.next`, R.len.rowValue);
-          oneOf(r.change, `${p}.change`, R.enums.change);
-          if (r.prev === r.next && r.change !== "same") err(`${p}.change`, "이전·이번 값이 같으면 same");
-          if (r.prev !== r.next && r.change === "same") err(`${p}.change`, "값이 다른데 same 사용 불가");
-          if (r.change === "new" && r.prev !== "없음") err(`${p}.prev`, 'change가 new면 prev는 "없음"');
         });
       }
       if (arr(s.cons, "summary.cons", R.count.cons, R.count.cons)) s.cons.forEach((x, i) => text(x, `summary.cons[${i}]`, R.len.con));
-      text(s.verdict, "summary.verdict", R.len.verdict, R.highlight.verdict);
+      text(s.conclusion, "summary.conclusion", R.len.conclusion);
     }
     return E;
   }
 
   /* ---------- 2. 렌더 ---------- */
-  const PAGE = (n) => `<span class="c-page"><b>0${n}</b> / 03</span>`;
-  const top = (n) => `<div class="c-top"><span class="c-brand">${esc(R.brand)}</span>${PAGE(n)}</div>`;
-  const foot = (d) => {
-    const src = (d.meta.sources || []).map((x) => plain(x.name)).filter(Boolean);
-    const label = src.length ? `출처: ${src[0]}${src.length > 1 ? ` 외 ${src.length - 1}곳` : ""}` : "";
-    return `<div class="c-foot"><span>${esc(label)}</span><span>${esc((d.meta.date || "").replace(/-/g, "."))} 기준 · ${esc(R.handle)}</span></div>`;
-  };
   const photoStyle = () => {
     const x = $("fx").value, y = $("fy").value, z = $("fz").value / 100;
     return `object-position:${x}% ${y}%;transform:scale(${z});transform-origin:${x}% ${y}%`;
@@ -141,69 +126,57 @@
 
   function render(d) {
     const g = (o, k, def = "") => (isObj(o) && o[k] != null ? o[k] : def);
+    const list = (v) => (Array.isArray(v) ? v : []);
     const c = g(d, "cover", {}), t = g(d, "detail", {}), s = g(d, "summary", {}), m = g(d, "meta", {});
-    const safe = { meta: m };
-    const tag = String(g(c, "tag"));
-    const bg2 = state.img2 || state.img1;
+    const bg = state.img2 || state.img1;
+    const bgLayer = `${bg ? `<img class="c-bgphoto" src="${bg}" alt="">` : ""}<div class="c-bgtint"></div>`;
+    const handle = `<div class="c-handle">${esc(R.handle)}</div>`;
+    const src = list(m.sources).map((x) => plain(g(x, "name"))).filter(Boolean);
+    const srcLine = `출처: ${src[0] || ""}${src.length > 1 ? ` 외 ${src.length - 1}곳` : ""} · ${String(g(m, "date")).replace(/-/g, ".")} 기준`;
 
     const p1 = `
       <div class="card p1">
         ${state.img1 ? `<img class="c-photo" src="${state.img1}" style="${photoStyle()}" alt="">` : `<div class="c-placeholder">커버 사진을 넣어주세요</div>`}
         <div class="c-scrim"></div>
-        ${top(1)}
-        <div class="c-body" data-check="1p 본문">
-          <div class="c-tagrow">
-            <span class="c-tag ${R.rumorTags.includes(tag) ? "is-rumor" : ""}">${esc(tag)}</span>
-            <span class="c-kicker">${rich(g(c, "kicker"), "hl-color")}</span>
-          </div>
-          <div class="c-title">
-            ${(Array.isArray(c.title) ? c.title : []).map((l, i) => `<div class="c-title-line" data-check-x="1p 제목 ${i + 1}줄">${rich(l, "hl-color")}</div>`).join("")}
-          </div>
+        <div class="c-logo">${esc(R.brand)}</div>
+        <div class="c-body" data-check="1p 제목">
+          ${list(c.title).map((l, i) => `<div class="c-title-line" data-check-x="1p 제목 ${i + 1}줄">${esc(plain(l))}</div>`).join("")}
         </div>
-        <div class="c-swipe">넘겨서 확인 <i></i></div>
       </div>`;
 
     const p2 = `
       <div class="card p2">
-        ${bg2 ? `<img class="c-bgphoto" src="${bg2}" alt="">` : ""}
-        <div class="c-bgtint"></div>
-        ${top(2)}
-        <div class="c-body" data-check="2p 본문">
-          <div class="c-label">핵심 내용</div>
-          <h2 class="c-headline">${rich(g(t, "headline"), "hl-mark")}</h2>
-          <p class="c-lead">${rich(g(t, "lead"), "hl-color")}</p>
-          <div class="c-points">
-            ${(Array.isArray(t.points) ? t.points : []).map((p, i) => `
-              <div class="c-point">
-                <span class="c-num">0${i + 1}</span>
-                <div><div class="c-plabel">${rich(g(p, "label"), "hl-color")}</div><div class="c-ptext">${rich(g(p, "text"), "hl-color")}</div></div>
-              </div>`).join("")}
-          </div>
+        ${bgLayer}
+        <div class="c-body center" data-check="2p 본문">
+          <div class="c-num">1.</div>
+          <h2 class="c-headline">“${rich(g(t, "headline"), "mk")}”</h2>
+          ${list(t.paras).map((p) => `<p class="c-para">${rich(p, "mk")}</p>`).join("")}
+          <p class="c-conclusion"><span class="mk">${esc(plain(g(t, "conclusion")))}</span></p>
         </div>
-        ${foot(safe)}
+        ${handle}
       </div>`;
 
-    const BADGE = { up: "▲ 개선", down: "▼ 아쉬움", same: "동일", new: "NEW" }; // 소비자 입장 기준
     const p3 = `
       <div class="card p3">
-        ${top(3)}
-        <div class="c-body" data-check="3p 본문">
-          <div class="c-label">정리</div>
-          <h2 class="c-headline">${rich(g(s, "headline"), "hl-color")}</h2>
-          <div class="c-table">
-            <div class="c-tr head"><div>항목</div><div>${rich(g(s, "compareWith"), "")}</div><div>${rich(g(m, "product"), "")}</div></div>
-            ${(Array.isArray(s.rows) ? s.rows : []).map((r) => `
-              <div class="c-tr">
-                <div class="c-item">${rich(g(r, "item"), "")}</div>
-                <div class="c-prev">${rich(g(r, "prev"), "")}</div>
-                <div class="c-next">${rich(g(r, "next"), "")}${BADGE[r && r.change] ? `<span class="c-badge ${r.change}">${BADGE[r.change]}</span>` : ""}</div>
-              </div>`).join("")}
+        ${bgLayer}
+        <div class="c-body center" data-check="3p 본문">
+          <div class="c-num">2.</div>
+          <h2 class="c-headline">${rich(g(s, "headline"), "mk")}</h2>
+          <div class="c-compare">
+            ${list(s.rows).map((r, i) => {
+              const same = plain(g(r, "prev")) === plain(g(r, "next"));
+              return `<div>
+                <div class="c-row-item">${esc(plain(g(r, "item")))}</div>
+                <div class="c-row-val" data-check-x="3p 비교 ${i + 1}행"><span class="c-prev">${esc(plain(g(r, "prev")))}</span><span class="c-arrow">→</span>${same ? `<span>${esc(plain(g(r, "next")))} (동일)</span>` : `<span class="mk">${esc(plain(g(r, "next")))}</span>`}</div>
+              </div>`;
+            }).join("")}
           </div>
           <div class="c-cons-label">아쉬운 점</div>
-          <ul class="c-cons">${(Array.isArray(s.cons) ? s.cons : []).map((x) => `<li>${rich(x, "")}</li>`).join("")}</ul>
-          <div class="c-verdict"><small>한줄 정리</small><p>${rich(g(s, "verdict"), "hl-color")}</p></div>
+          <ul class="c-cons">${list(s.cons).map((x) => `<li>${esc(plain(x))}</li>`).join("")}</ul>
+          <p class="c-conclusion"><span class="mk">${esc(plain(g(s, "conclusion")))}</span></p>
         </div>
-        ${foot(safe)}
+        <div class="c-source" data-check-x="3p 출처">${esc(srcLine)}</div>
+        ${handle}
       </div>`;
 
     $("deck").innerHTML = [p1, p2, p3].map((h) => `<div class="frame">${h}</div>`).join("");
@@ -217,10 +190,7 @@
       if (el.scrollHeight > el.clientHeight + 1) E.push(`${el.dataset.check}: 내용이 카드 밖으로 넘침 (${el.scrollHeight - el.clientHeight}px) → 문장을 줄일 것`);
     });
     document.querySelectorAll("[data-check-x]").forEach((el) => {
-      if (el.scrollWidth > el.clientWidth + 1) E.push(`${el.dataset.checkX}: 가로로 넘침 → 더 짧은 단어로 바꿀 것`);
-    });
-    document.querySelectorAll(".c-tr .c-next, .c-tr .c-prev").forEach((el) => {
-      if (el.offsetHeight > 92) E.push(`3p 비교표 "${el.textContent.trim().slice(0, 12)}": 두 줄로 넘어감 → 값을 줄일 것`);
+      if (el.scrollWidth > el.clientWidth + 1) E.push(`${el.dataset.checkX}: 가로로 넘침 → 더 짧게 쓸 것`);
     });
     if (!state.img1) E.push("1p 커버 사진이 없음 (사진을 넣어주세요)");
     return E;
