@@ -11,3 +11,6 @@
 - **기종·가격**: `assets/main.js`의 `PHONES` 배열 (출고가, 공시지원금, 가입유형별 추가지원금)
 - **상담 접수 서버**: `assets/main.js`의 `FORM_ENDPOINT`에 주소를 넣으면 JSON으로 POST 전송합니다. 비워두면 완료 모달만 띄웁니다.
 - **전화번호·사업자 정보**: `index.html`의 `1600-0000`, 푸터 `address`
+
+## 인스타 카드뉴스
+- `cardnews/`: IT 소식 3장 카드뉴스 제작 도구. 사용법은 `cardnews/README.md`
