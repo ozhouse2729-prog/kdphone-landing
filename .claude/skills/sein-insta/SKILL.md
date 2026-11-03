@@ -66,4 +66,4 @@ node <스킬 폴더>/scripts/render.js --data card.json --cover <사진> --out <
 - `references/copy-rules.md`: 카피 규칙과 JSON 형식 (작성 전 필독)
 - `references/design-rules.md`: 디자인 규칙 (왜 이렇게 생겼는지. 디자인 질문이 올 때 참고)
 - `scripts/render.js`: 렌더러 + 검사기
-- `assets/`: 고정 디자인. `rules.js`(글자 수·금지어·브랜드명), `cards.css`(디자인), `engine.js`(검사·렌더), `studio.html`(수동 모드), `fonts/`(Pretendard, OFL)
+- `assets/`: 고정 디자인. `rules.js`(글자 수·금지어·브랜드명), `cards.css`(디자인), `engine.js`(검사·렌더), `studio.html`(수동 모드), `fonts/`(ONE 모바일고딕 Title·리디바탕), `fonts-data.js`(수동 모드 저장용 폰트 묶음)

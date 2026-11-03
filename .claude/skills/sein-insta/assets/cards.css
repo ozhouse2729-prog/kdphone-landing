@@ -11,6 +11,8 @@
   --ink-2: rgba(255, 255, 255, .9);
   --ink-3: rgba(255, 255, 255, .55);
   --pad: 88px;
+  --f-title: "ONE Mobile Title", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-body: "RIDIBatang", "AppleMyungjo", "Batang", serif;
 
   position: relative;
   width: 1080px;
@@ -18,11 +20,15 @@
   overflow: hidden;
   background: #000;
   color: var(--ink);
-  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-family: var(--f-body);
+  font-weight: 400;
+  font-synthesis: none;   /* 굵기 1종 폰트라 브라우저가 가짜 굵게 만들지 않도록 */
   word-break: keep-all;
   overflow-wrap: break-word;
 }
-.card * { box-sizing: border-box; margin: 0; }
+.card * { box-sizing: border-box; margin: 0; font-weight: 400; }
+/* 제목 폰트를 쓰는 곳 */
+.c-logo, .c-title-line, .c-num, .c-headline, .c-conclusion, .p3 .c-next { font-family: var(--f-title); }
 
 /* 형광펜 강조: 줄이 바뀌어도 박스가 자연스럽게 이어짐 */
 .mk {
@@ -40,7 +46,7 @@
 .p1 .c-placeholder {
   position: absolute; inset: 0; display: grid; place-items: center;
   background: repeating-linear-gradient(45deg, #1a1a22 0 24px, #141419 24px 48px);
-  color: var(--ink-3); font-size: 34px; font-weight: 600;
+  color: var(--ink-3); font-size: 34px;
 }
 .p1 .c-scrim {
   position: absolute; inset: 0; z-index: 2;
@@ -52,7 +58,7 @@
 .p1 .c-logo {
   position: absolute; z-index: 5; left: var(--pad); top: 30px;
   background: #000; color: #fff;
-  font-size: 30px; font-weight: 900; letter-spacing: .02em; line-height: 1;
+  font-size: 30px; letter-spacing: 0; line-height: 1;
   padding: 14px 22px 13px; border-radius: 6px;
 }
 .p1 .c-logo::after {
@@ -64,7 +70,7 @@
   max-height: 560px; overflow: hidden;
 }
 .p1 .c-title-line {
-  font-size: 90px; font-weight: 900; line-height: 1.22; letter-spacing: -0.045em;
+  font-size: 92px; line-height: 1.24; letter-spacing: -0.03em;
   white-space: nowrap; overflow: hidden;
   text-shadow: 0 2px 24px rgba(0,0,0,.5);
 }
@@ -88,24 +94,24 @@
   display: flex; flex-direction: column; justify-content: center; align-items: center;
   text-align: center;
 }
-.c-num { font-size: 60px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; margin-bottom: 40px; }
+.c-num { font-size: 62px; letter-spacing: 0; line-height: 1; margin-bottom: 40px; }
 .c-headline {
-  font-size: 58px; font-weight: 800; line-height: 1.45; letter-spacing: -0.04em;
+  font-size: 58px; line-height: 1.45; letter-spacing: -0.03em;
   text-wrap: balance; margin-bottom: 64px;
 }
 .c-para {
-  font-size: 35px; font-weight: 600; line-height: 1.7; letter-spacing: -0.03em;
+  font-size: 37px; line-height: 1.75; letter-spacing: -0.02em;
   color: var(--ink-2); text-wrap: balance;
 }
 .c-para + .c-para { margin-top: 48px; }
 .c-conclusion {
   margin-top: 64px;
-  font-size: 37px; font-weight: 800; line-height: 1.7; letter-spacing: -0.03em;
+  font-size: 38px; line-height: 1.7; letter-spacing: -0.02em;
   text-wrap: balance;
 }
 .c-handle {
   position: absolute; z-index: 5; left: 0; right: 0; bottom: 64px; text-align: center;
-  font-size: 25px; font-weight: 500; color: var(--ink-3); letter-spacing: 0;
+  font-size: 25px; color: var(--ink-3); letter-spacing: 0;
 }
 .c-source {
   position: absolute; z-index: 5; left: var(--pad); right: var(--pad); bottom: 104px; text-align: center;
@@ -118,13 +124,13 @@
    ========================================================= */
 .p3 .c-headline { margin-bottom: 52px; }
 .p3 .c-compare { display: flex; flex-direction: column; gap: 30px; margin-bottom: 52px; }
-.p3 .c-row-item { font-size: 25px; font-weight: 600; color: var(--ink-3); margin-bottom: 6px; }
-.p3 .c-row-val { font-size: 37px; font-weight: 700; line-height: 1.45; white-space: nowrap; max-width: 904px; overflow: hidden; }
-.p3 .c-prev { color: rgba(255,255,255,.6); font-weight: 500; }
-.p3 .c-arrow { color: rgba(255,255,255,.45); font-weight: 400; margin: 0 .45em; }
-.p3 .c-cons-label { font-size: 27px; font-weight: 700; color: var(--ink-3); margin-bottom: 14px; }
+.p3 .c-row-item { font-size: 26px; color: var(--ink-3); margin-bottom: 6px; }
+.p3 .c-row-val { font-size: 38px; line-height: 1.45; white-space: nowrap; max-width: 904px; overflow: hidden; }
+.p3 .c-prev { color: rgba(255,255,255,.62); }
+.p3 .c-arrow { color: rgba(255,255,255,.45); margin: 0 .45em; }
+.p3 .c-cons-label { font-size: 27px; color: var(--ink-3); margin-bottom: 14px; }
 .p3 .c-cons { list-style: none; padding: 0; }
-.p3 .c-cons li { font-size: 34px; font-weight: 600; line-height: 1.6; color: var(--ink-2); }
+.p3 .c-cons li { font-size: 36px; line-height: 1.6; color: var(--ink-2); }
 .p3 .c-conclusion { margin-top: 52px; }
 
 /* 제목·문단 속 형광펜은 한 덩어리로 (중간에 줄이 끊기지 않게) */

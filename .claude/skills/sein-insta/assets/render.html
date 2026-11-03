@@ -23,7 +23,7 @@
       deck.innerHTML = E.render(data, imgs, focus).join("");
       await document.fonts.ready;
       await Promise.all([...deck.querySelectorAll("img")].map((i) => i.decode().catch(() => {})));
-      const fontOk = ["500", "800", "900"].every((w) => document.fonts.check(`${w} 40px Pretendard`));
+      const fontOk = document.fonts.check(`40px "ONE Mobile Title"`) && document.fonts.check(`40px RIDIBatang`);
       return { errors: [...errors, ...E.checkOverflow(deck, !!imgs.cover)], fontOk };
     };
   </script>

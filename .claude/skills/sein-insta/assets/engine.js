@@ -166,7 +166,7 @@
               const same = plain(g(r, "prev")) === plain(g(r, "next"));
               return `<div>
                 <div class="c-row-item">${esc(plain(g(r, "item")))}</div>
-                <div class="c-row-val" data-check-x="3p 비교 ${i + 1}행"><span class="c-prev">${esc(plain(g(r, "prev")))}</span><span class="c-arrow">→</span>${same ? `<span>${esc(plain(g(r, "next")))} (동일)</span>` : `<span class="mk">${esc(plain(g(r, "next")))}</span>`}</div>
+                <div class="c-row-val" data-check-x="3p 비교 ${i + 1}행"><span class="c-prev">${esc(plain(g(r, "prev")))}</span><span class="c-arrow">→</span>${same ? `<span class="c-next">${esc(plain(g(r, "next")))} (동일)</span>` : `<span class="c-next mk">${esc(plain(g(r, "next")))}</span>`}</div>
               </div>`;
             }).join("")}
           </div>

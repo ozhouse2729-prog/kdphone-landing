@@ -61,7 +61,7 @@
       const slug = E.plain(state.data.meta.product).replace(/\s+/g, "");
       const cards = document.querySelectorAll("#deck .card");
       for (let i = 0; i < cards.length; i++) {
-        const blob = await htmlToImage.toBlob(cards[i], { width: 1080, height: 1350, pixelRatio: 1, style: { transform: "none" } });
+        const blob = await htmlToImage.toBlob(cards[i], { width: 1080, height: 1350, pixelRatio: 1, style: { transform: "none" }, fontEmbedCSS: window.CARD_FONT_CSS });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
         a.download = `${state.data.meta.date}_${slug}_${i + 1}.png`;

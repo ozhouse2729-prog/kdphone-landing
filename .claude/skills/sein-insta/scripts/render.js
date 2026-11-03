@@ -82,7 +82,7 @@ const toDataUrl = (p) => {
     }
     await browser.close();
     const res = { ok: passed, errors, files };
-    if (!fontOk) res.warning = "Pretendard 폰트 로딩 실패. 결과물 글꼴이 다를 수 있음";
+    if (!fontOk) res.warning = "카드 폰트(ONE Mobile Title·RIDIBatang) 로딩 실패. 결과물 글꼴이 다를 수 있음";
     out(res, passed ? 0 : 2);
   } catch (e) {
     await browser.close();

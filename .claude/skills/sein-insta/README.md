@@ -36,9 +36,11 @@ Claude가 알아서 아래를 처리합니다.
 | `assets/cards.css` | 카드 디자인 |
 | `assets/engine.js` | 검사·렌더 엔진 (자동·수동 공통) |
 | `assets/studio.html` | 수동 모드 화면 |
-| `assets/fonts/` | Pretendard 폰트 (SIL OFL 1.1) |
+| `assets/fonts/` | 카드 폰트: ONE 모바일고딕 Title(제목), 리디바탕(본문) |
+| `assets/fonts-data.js` | 수동 모드 PNG 저장용 폰트 묶음 (`scripts/build-studio-fonts.js`로 생성) |
 
 ## 바꾸고 싶을 때
 - **브랜드명·계정:** `assets/rules.js` 맨 위 `brand`, `handle`
 - **글자 수·금지어:** `assets/rules.js`. 바꾼 숫자는 `references/copy-rules.md`에도 똑같이 반영
 - **디자인:** `assets/cards.css`만 수정
+- **폰트:** `assets/fonts/`에 woff2 추가 → `assets/fonts.css` 수정 → `node scripts/build-studio-fonts.js`
