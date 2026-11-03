@@ -14,4 +14,4 @@
 
 ## 인스타 카드뉴스 (새인 인스타 스킬)
 - `.claude/skills/sein-insta/`: IT 소식 3장 카드뉴스를 만드는 Claude 스킬. 사용법은 `.claude/skills/sein-insta/README.md`
-- `dist/sein-insta.zip`: claude.ai 업로드용 압축본 (설정 → 기능 → 스킬)
+- `dist/sein-insta.skill`: claude.ai 설치·업데이트용 스킬 파일

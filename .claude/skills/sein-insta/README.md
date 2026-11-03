@@ -19,7 +19,7 @@ Claude가 알아서 아래를 처리합니다.
 고칠 게 있으면 "제목 더 궁금하게", "단점 다른 걸로"처럼 말하면 그 부분만 바꿔서 다시 만들어 줍니다.
 
 ## 설치
-- **claude.ai:** 이 폴더(`sein-insta`)를 zip으로 압축해 **설정 → 기능(Capabilities) → 스킬**에서 업로드합니다. 렌더링하려면 코드 실행 기능이 켜져 있어야 합니다.
+- **claude.ai:** 저장소의 `dist/sein-insta.skill` 파일을 Claude 대화창에 올리거나, Claude가 준 `.skill` 파일 카드에서 설치·업데이트 버튼을 누릅니다. 렌더링하려면 코드 실행 기능이 켜져 있어야 합니다.
 - **Claude Code:** 이 저장소에서 쓰면 `.claude/skills/sein-insta`에 있어서 자동으로 인식됩니다.
 
 ## 수동 모드 (Claude 없이)

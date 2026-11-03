@@ -4,8 +4,8 @@
    - 숫자를 바꾸면 PROMPT.md / schema.json의 같은 숫자도 함께 바꾸세요.
    ========================================================= */
 window.CARD_RULES = {
-  brand: "KD폰",        // 1p 왼쪽 위 로고
-  handle: "@kdphone",   // 2p·3p 맨 아래
+  brand: "국대폰 막내", // 1p 왼쪽 위 로고
+  handle: "@kdphone_zip", // 2p·3p 맨 아래
 
   // 글자 수 = 공백 포함, [[ ]] 기호 제외, 따옴표 포함
   len: {
